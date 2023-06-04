@@ -1,95 +1,145 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const dados = [
+    {
+      id: 1,
+      nome: "A",
+      prioridade: 0,
+      tempoEntrada: 0,
+      tempoExecucao: 5,
+    },
+    {
+      id: 2,
+      nome: "B",
+      prioridade: 0,
+      tempoEntrada: 0,
+      tempoExecucao: 4,
+    },
+    {
+      id: 3,
+      nome: "C",
+      prioridade: 1,
+      tempoEntrada: 0,
+      tempoExecucao: 3,
+    },
+    {
+      id: 4,
+      nome: "D",
+      prioridade: 0,
+      tempoEntrada: 3,
+      tempoExecucao: 5,
+    },
+  ];
+
+  const fila0 = []; //prioridade 0
+  const fila1 = []; //prioridade 1
+  const processos = []; //ordem de execucao
+  
+  //RR
+  const quantum = 2; //fatia de tempo para execucao
+
+  /*FILA 0 = FIFO && FILA 1 = RR */
+  const verAlgortimo = () => {
+    dados.map((dado) => {
+      if (dado.prioridade === 0) {
+        fila0.push(dado);
+      } else {
+        fila1.push(dado);
+      }
+    });
+  };
+
+  //coloca os processos na fila de execucao
+  function ordenaProcessos() {
+    //FIFO
+    fila0.map((processo) => {
+      for (let i = 0; i < processo.tempoExecucao; i++) {
+        processos.push(processo);
+      }
+    });
+    //RR
+    fila1.map((processo) => {
+      processos.push(processo);
+    });
+  }
+
+  //FIFO - RENDERIZAR PROCESSOS
+  const renderFila0 = () => {
+    return fila0.map((processo) => {
+      return (
+        <div key={processo.id}>
+          <p style={{ border: "1px solid #000", background: "red" }}>
+            {processo.nome}
+          </p>
+        </div>
+      );
+    });
+  };
+
+  //renderiza os processos na tela
+  function renderProcessos() {
+    return processos.map((i) => {
+      return (
+        <div key={i.id}>
+          <p style={{ border: "1px solid #000", background: "red" }}>
+            {i.nome}
+          </p>
+        </div>
+      );
+    });
+  }
+
+  //renderiza os processos para cada tempo de execucao
+  function renderProcessosTempo() {
+    return processos.map((processo) => {
+      return (
+        <div
+          key={Math.random()}
+          style={{ width: "100%", display: "flex", flexDirection: "row" }}
+        >
+          <p
+            style={{
+              width: "100%",
+              padding: "10px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              border: "1px solid #000",
+              background: "cyan",
+            }}
           >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            {processo.nome}
+          </p>
+        </div>
+      );
+    });
+  }
+
+  verAlgortimo();
+  ordenaProcessos();
+
+  
+
+  return (
+    <main style={{ width: "100%", height: "100%", padding: "30px" }}>
+      <p style={{ padding: "10px" }}>ESCALONAMENTO - MÚLTIPLAS FILAS</p>
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        <span>Diagrama de execucao na CPU</span>
+        <div
+          style={{
+            border: "1px solid #000",
+            display: "flex",
+          }}
+        >
+          {renderProcessosTempo()}
         </div>
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
     </main>
-  )
+  );
 }
