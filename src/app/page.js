@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 export default function Home() {
   const dados = [
     {
@@ -8,6 +10,7 @@ export default function Home() {
       prioridade: 0,
       tempoEntrada: 0,
       tempoExecucao: 5,
+      color: "red",
     },
     {
       id: 2,
@@ -15,6 +18,7 @@ export default function Home() {
       prioridade: 0,
       tempoEntrada: 0,
       tempoExecucao: 4,
+      color: "blue",
     },
     {
       id: 3,
@@ -22,6 +26,7 @@ export default function Home() {
       prioridade: 1,
       tempoEntrada: 0,
       tempoExecucao: 3,
+      color: "green",
     },
     {
       id: 4,
@@ -29,13 +34,24 @@ export default function Home() {
       prioridade: 0,
       tempoEntrada: 3,
       tempoExecucao: 5,
+      color: "yellow",
+    },
+    {
+      id: 5,
+      nome: "E",
+      prioridade: 1,
+      tempoEntrada: 3,
+      tempoExecucao: 3,
+      color: "pink",
     },
   ];
 
   const fila0 = []; //prioridade 0
   const fila1 = []; //prioridade 1
   const processos = []; //ordem de execucao
-  
+  const filaRR = []; //lista de processos para RR
+  const tempo = []; //tempo
+
   //RR
   const quantum = 2; //fatia de tempo para execucao
 
@@ -60,16 +76,39 @@ export default function Home() {
     });
     //RR
     fila1.map((processo) => {
-      processos.push(processo);
+      // processos.push(processo);
     });
   }
 
-  //FIFO - RENDERIZAR PROCESSOS
+  function ordenaProcessosRR() {
+    //RR
+    for (let i = 0; i < fila1.length; i++) {
+      let novoArray = [fila1[i]];
+      filaRR.push(novoArray);
+      for (let j = 0; j < filaRR[i].tempoExecucao; j++) {
+        let newArray = [];
+        newArray.push(filaRR[i][j]);
+        console.log("newArray", newArray);
+      }
+    }
+  }
+
+  //FIFO - RENDERIZAR PROCESSOS - FILA 0
   const renderFila0 = () => {
     return fila0.map((processo) => {
       return (
         <div key={processo.id}>
-          <p style={{ border: "1px solid #000", background: "red" }}>
+          <p
+            style={{
+              width: "50px",
+              padding: "2px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              border: "1px solid #000",
+              background: processo.color,
+            }}
+          >
             {processo.nome}
           </p>
         </div>
@@ -77,18 +116,29 @@ export default function Home() {
     });
   };
 
-  //renderiza os processos na tela
-  function renderProcessos() {
-    return processos.map((i) => {
+  //RR - RENDERIZAR PROCESSOS - FILA 1
+  const renderFila1 = () => {
+    return fila1.map((processo) => {
       return (
-        <div key={i.id}>
-          <p style={{ border: "1px solid #000", background: "red" }}>
-            {i.nome}
+        <div key={processo.id}>
+          <p
+
+            style={{
+              width: "50px",
+              padding: "2px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              border: "1px solid #000",
+              background: processo.color,
+            }}
+          >
+            {processo.nome}
           </p>
         </div>
       );
     });
-  }
+  };
 
   //renderiza os processos para cada tempo de execucao
   function renderProcessosTempo() {
@@ -96,17 +146,17 @@ export default function Home() {
       return (
         <div
           key={Math.random()}
-          style={{ width: "100%", display: "flex", flexDirection: "row" }}
+          style={{ display: "flex", flexDirection: "row" }}
         >
           <p
             style={{
-              width: "100%",
-              padding: "10px",
+              width: "50px",
+              padding: "2px",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               border: "1px solid #000",
-              background: "cyan",
+              background: processo.color,
             }}
           >
             {processo.nome}
@@ -116,10 +166,37 @@ export default function Home() {
     });
   }
 
+  //renderiza o tempo de execucao
+  function renderTempoExecucao() {
+    for (let i = 0; i < processos.length; i++) {
+      tempo.push(i);
+    }
+    return tempo.map((t) => {
+      return (
+        <div
+          key={Math.random()}
+          style={{
+            width: "50px",
+            padding: "2px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            border: "1px solid #000",
+          }}
+        >
+          {t}
+        </div>
+      );
+    });
+  }
+
+  //executar
   verAlgortimo();
+  ordenaProcessosRR();
   ordenaProcessos();
 
-  
+  console.log("Fila1", fila1);
+  console.log("FilaRR", filaRR);
 
   return (
     <main style={{ width: "100%", height: "100%", padding: "30px" }}>
@@ -137,8 +214,43 @@ export default function Home() {
             display: "flex",
           }}
         >
+          <p
+            style={{
+              width: "100px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Tempo
+          </p>
+          {renderTempoExecucao()}
+        </div>
+        <div
+          style={{
+            border: "1px solid #000",
+            display: "flex",
+          }}
+        >
+          <p
+            style={{
+              width: "100px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Processos
+          </p>
           {renderProcessosTempo()}
         </div>
+      </div>
+      <div>
+        <h3>Fila de Processos</h3>
+        <p>Fila de prioridade 0 - FIFO</p>
+        <div style={{ display: "flex" }}>{renderFila0()}</div>
+        <p>Fila de prioridade 1 - RR</p>
+        <div style={{ display: "flex" }}>{renderFila1()}</div>
       </div>
     </main>
   );
