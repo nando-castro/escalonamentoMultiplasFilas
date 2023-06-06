@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 export default function Home() {
   const dados = [
     {
@@ -46,11 +44,11 @@ export default function Home() {
     },
   ];
 
+  const tempo = []; //tempo
   const fila0 = []; //prioridade 0
   const fila1 = []; //prioridade 1
-  const processos = []; //ordem de execucao
   const filaRR = []; //lista de processos para RR
-  const tempo = []; //tempo
+  const processos = []; //ordem de execucao
 
   //RR
   const quantum = 2; //fatia de tempo para execucao
@@ -77,18 +75,32 @@ export default function Home() {
     //RR
     fila1.map((processo) => {
       // processos.push(processo);
+      //retirar dois elementos de cada vez de cada array dentro do array listaRR e adicionar a processos
+      ordenaProcessosRR();
+      
     });
   }
-
+  
   function ordenaProcessosRR() {
     //RR
     for (let i = 0; i < fila1.length; i++) {
       let novoArray = [fila1[i]];
       filaRR.push(novoArray);
-      for (let j = 0; j < filaRR[i].tempoExecucao; j++) {
-        let newArray = [];
-        newArray.push(filaRR[i][j]);
-        console.log("newArray", newArray);
+    }
+
+    for(let i = 0; i < filaRR.length; i++) {
+      for(let j = 0; j < filaRR[i].tempoExecucao -1; j++) {
+        filaRR[i].push(filaRR[i]);
+      }
+    }
+
+    for(let i = 0; i < filaRR.length; i++) {
+      for(let j = 0; j < filaRR[i].length; j++) {
+        if(filaRR[i].length === 0) return;
+
+        processos.push(filaRR[i].splice(0, quantum));
+        // console.log("***", filaRR[i].splice(0, quantum));
+        
       }
     }
   }
@@ -108,7 +120,7 @@ export default function Home() {
               border: "1px solid #000",
               background: processo.color,
             }}
-          >
+            >
             {processo.nome}
           </p>
         </div>
@@ -139,13 +151,13 @@ export default function Home() {
       );
     });
   };
-
+  
   //renderiza os processos para cada tempo de execucao
   function renderProcessosTempo() {
     return processos.map((processo) => {
       return (
         <div
-          key={Math.random()}
+        key={Math.random()}
           style={{ display: "flex", flexDirection: "row" }}
         >
           <p
@@ -190,14 +202,16 @@ export default function Home() {
     });
   }
 
-  //executar
-  verAlgortimo();
-  ordenaProcessosRR();
-  ordenaProcessos();
+// Chamada da função para executar o Round Robin
 
+//executar
+verAlgortimo();
+ordenaProcessos();
+// ordenaProcessosRR();
+  
   console.log("Fila1", fila1);
   console.log("FilaRR", filaRR);
-
+  
   return (
     <main style={{ width: "100%", height: "100%", padding: "30px" }}>
       <p style={{ padding: "10px" }}>ESCALONAMENTO - MÚLTIPLAS FILAS</p>
