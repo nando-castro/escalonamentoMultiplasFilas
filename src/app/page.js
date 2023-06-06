@@ -298,6 +298,7 @@ export default function Home() {
           >
             Executar
           </button>
+          {/* <img alt="manoelflamenguista" src="https://pbs.twimg.com/profile_images/1619947440026619905/Bl5rQH58_400x400.jpg" width={200} /> */}
           <div style={{ marginTop: "50px" }}>
             <h3>Dados dos Processos</h3>
             {dados.map((dado) => {
