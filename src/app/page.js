@@ -39,7 +39,7 @@ export default function Home() {
       nome: "E",
       prioridade: 1,
       tempoEntrada: 3,
-      tempoExecucao: 3,
+      tempoExecucao: 4,
       color: "pink",
     },
   ];
@@ -73,14 +73,9 @@ export default function Home() {
       }
     });
     //RR
-    fila1.map((processo) => {
-      // processos.push(processo);
-      //retirar dois elementos de cada vez de cada array dentro do array listaRR e adicionar a processos
-      ordenaProcessosRR();
-      
-    });
+    ordenaProcessosRR();
   }
-  
+
   function ordenaProcessosRR() {
     //RR
     for (let i = 0; i < fila1.length; i++) {
@@ -88,19 +83,30 @@ export default function Home() {
       filaRR.push(novoArray);
     }
 
-    for(let i = 0; i < filaRR.length; i++) {
-      for(let j = 0; j < filaRR[i].tempoExecucao -1; j++) {
-        filaRR[i].push(filaRR[i]);
+    const novaFilaRR = filaRR.map((processo) => {
+      for (let i = 0; i < processo[0].tempoExecucao-1; i++) {
+        processo.push(processo[0]);
       }
-    }
+      return processo;
+    });
+    
 
-    for(let i = 0; i < filaRR.length; i++) {
-      for(let j = 0; j < filaRR[i].length; j++) {
-        if(filaRR[i].length === 0) return;
-
-        processos.push(filaRR[i].splice(0, quantum));
-        // console.log("***", filaRR[i].splice(0, quantum));
-        
+    //Reorganiza a filaRR para chamar 
+    while (novaFilaRR.length > 0) {
+      for (let i = 0; i < novaFilaRR.length; i++) {
+        let array = novaFilaRR[i];
+        if (array.length > 1) {
+          let elementosRemovidos = array.splice(array.length - quantum, quantum);
+          processos.push(...elementosRemovidos);
+          console.log("Elementos removidos:", elementosRemovidos);
+        } else if (array.length === 1) {
+          let elementoRemovido = array.pop();
+          processos.push(elementoRemovido);
+          console.log("Elemento removido:", elementoRemovido);
+        } else {
+          novaFilaRR.splice(i, 1);
+          i--;
+        }
       }
     }
   }
@@ -120,7 +126,7 @@ export default function Home() {
               border: "1px solid #000",
               background: processo.color,
             }}
-            >
+          >
             {processo.nome}
           </p>
         </div>
@@ -134,7 +140,6 @@ export default function Home() {
       return (
         <div key={processo.id}>
           <p
-
             style={{
               width: "50px",
               padding: "2px",
@@ -151,13 +156,13 @@ export default function Home() {
       );
     });
   };
-  
+
   //renderiza os processos para cada tempo de execucao
   function renderProcessosTempo() {
     return processos.map((processo) => {
       return (
         <div
-        key={Math.random()}
+          key={Math.random()}
           style={{ display: "flex", flexDirection: "row" }}
         >
           <p
@@ -202,16 +207,10 @@ export default function Home() {
     });
   }
 
-// Chamada da função para executar o Round Robin
+  //executar as duas funções
+  verAlgortimo();
+  ordenaProcessos();
 
-//executar
-verAlgortimo();
-ordenaProcessos();
-// ordenaProcessosRR();
-  
-  console.log("Fila1", fila1);
-  console.log("FilaRR", filaRR);
-  
   return (
     <main style={{ width: "100%", height: "100%", padding: "30px" }}>
       <p style={{ padding: "10px" }}>ESCALONAMENTO - MÚLTIPLAS FILAS</p>
