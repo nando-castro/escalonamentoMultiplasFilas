@@ -230,7 +230,7 @@ export default function Home() {
 
   //RR - RENDERIZAR PROCESSOS - FILA 1
   const renderFila1 = () => {
-    return resultados.map((processo) => {
+    return fila01.map((processo) => {
       return (
         <div key={processo.id}>
           <p
