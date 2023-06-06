@@ -16,7 +16,7 @@ export default function Home() {
       id: 2,
       nome: "B",
       prioridade: 0,
-      tempoEntrada: 1,
+      tempoEntrada: 0,
       tempoExecucao: 4,
       color: "blue",
     },
@@ -24,7 +24,7 @@ export default function Home() {
       id: 3,
       nome: "C",
       prioridade: 1,
-      tempoEntrada: 0,
+      tempoEntrada: 1,
       tempoExecucao: 3,
       color: "green",
     },
@@ -119,37 +119,92 @@ export default function Home() {
   /*TABELA*/
   const tabela = [];
 
-  //calcula o tempo de chegada e soma ao tempo de execucao de cada processo, e retorna o tempo de espera e o tempo total (turnaround)
-  function calculaTempo() {
-    let tempoChegada = 0;
-    let tempoExecucao = 0;
-    let tempoEspera = 0;
-    let tempoTotal = 0;
-    let tempoRetorno = 0;
-    let tempoResposta = 0;
-    const todosProcessos = fila0.concat(fila1);
-
-    for (let i = 0; i < todosProcessos.length; i++) {
-      tempoChegada += todosProcessos[i].tempoEntrada;
-      tempoExecucao += todosProcessos[i].tempoExecucao;
-      tempoEspera = tempoChegada - todosProcessos[i].tempoEntrada;
-      tempoTotal = tempoExecucao + tempoEspera;
-      tempoRetorno = tempoTotal - todosProcessos[i].tempoEntrada;
-      tempoResposta = tempoChegada - todosProcessos[i].tempoEntrada;
-      tabela.push({
-        nome: todosProcessos[i].nome,
-        tempoChegada: tempoChegada,
-        tempoExecucao: tempoExecucao,
-        tempoEspera: tempoEspera,
-        tempoTotal: tempoTotal,
-        tempoRetorno: tempoRetorno,
-        tempoResposta: tempoResposta,
+  const resultados = [];
+  function calcularTempos(dados, quantum) {
+  
+    // Função auxiliar para calcular o tempo de espera médio
+    const calcularTempoEsperaMedio = (tempoEspera) =>
+      tempoEspera.reduce((acc, val) => acc + val, 0) / tempoEspera.length;
+  
+    for (const processo of dados) {
+      const fila = processo.prioridade === 0 ? "Fila 0" : "Fila 1";
+  
+      let tempoEspera = 0;
+      let tempoExecucao = processo.tempoExecucao;
+  
+      if (fila === "Fila 0") {
+        for (const outroProcesso of dados) {
+          if (
+            outroProcesso.tempoEntrada < processo.tempoEntrada ||
+            (outroProcesso.tempoEntrada === processo.tempoEntrada &&
+              outroProcesso.id < processo.id)
+          ) {
+            tempoEspera += outroProcesso.tempoExecucao;
+          }
+        }
+      }
+  
+      if (fila === "Fila 1") {
+        let tempoRestante = processo.tempoExecucao;
+        while (tempoRestante > 0) {
+          if (tempoRestante <= quantum) {
+            tempoExecucao = tempoRestante;
+            tempoRestante = 0;
+          } else {
+            tempoExecucao = quantum;
+            tempoRestante -= quantum;
+          }
+          tempoEspera +=
+            dados
+              .filter(
+                (outroProcesso) =>
+                  outroProcesso.prioridade === 1 &&
+                  outroProcesso.tempoEntrada < processo.tempoEntrada
+              )
+              .reduce((acc, val) => acc + val.tempoExecucao, 0) +
+            (dados
+              .filter(
+                (outroProcesso) =>
+                  outroProcesso.prioridade === 0 &&
+                  outroProcesso.tempoEntrada < processo.tempoEntrada
+              )
+              .length *
+              tempoExecucao);
+        }
+      }
+  
+      const tempoTotal = tempoEspera + tempoExecucao;
+  
+      resultados.push({
+        processo: processo.nome,
+        tempoChegada: processo.tempoEntrada,
+        prioridade: processo.prioridade,
+        tempoEspera,
+        tempoExecucao,
+        tempoTotal,
       });
     }
+  
+    const tempoEsperaFila0 = resultados
+      .filter((resultado) => resultado.prioridade === 0)
+      .map((resultado) => resultado.tempoEspera);
+    const tempoEsperaFila1 = resultados
+      .filter((resultado) => resultado.prioridade === 1)
+      .map((resultado) => resultado.tempoEspera);
+    const tempoEsperaMedioFila0 = calcularTempoEsperaMedio(tempoEsperaFila0);
+    const tempoEsperaMedioFila1 = calcularTempoEsperaMedio(tempoEsperaFila1);
+  
+    console.log(resultados);
+    console.log("Tempo de espera médio na Fila 0:", tempoEsperaMedioFila0);
+    console.log("Tempo de espera médio na Fila 1:", tempoEsperaMedioFila1);
   }
-
+  
+  // const quantum = 2;
+  
+  calcularTempos(dados, quantum);
+  
   /* ---------------------FUNÇÕES DE RENDERIZAÇÃO-------------------------- */
-
+  
   //FIFO - RENDERIZAR PROCESSOS - FILA 0
   const renderFila0 = () => {
     return fila0.map((processo) => {
@@ -175,7 +230,7 @@ export default function Home() {
 
   //RR - RENDERIZAR PROCESSOS - FILA 1
   const renderFila1 = () => {
-    return fila1.map((processo) => {
+    return resultados.map((processo) => {
       return (
         <div key={processo.id}>
           <p
@@ -248,7 +303,7 @@ export default function Home() {
 
   //renderiza os dados do array tabela
   function renderTabela() {
-    return tabela.map((processo) => {
+    return resultados.map((processo) => {
       return (
         <div
           key={Math.random()}
@@ -262,13 +317,11 @@ export default function Home() {
             gap: "20px",
           }}
         >
-          <p style={{ width: "90px" }}>{processo.nome}</p>
+          <p style={{ width: "90px" }}>{processo.processo}</p>
           <p style={{ width: "150px" }}>{processo.tempoChegada}</p>
+          <p style={{ width: "120px" }}>{processo.tempoEspera}</p>
           <p style={{ width: "130px" }}>{processo.tempoExecucao}</p>
           <p style={{ width: "100px" }}>{processo.tempoTotal}</p>
-          {/* <p style={{ width: "120px" }}>{processo.tempoEspera}</p> */}
-          {/* <p style={{ width: "50px" }}>{processo.tempoRetorno}</p> */}
-          {/* <p style={{ width: "50px" }}>{processo.tempoResposta}</p> */}
         </div>
       );
     });
@@ -277,7 +330,7 @@ export default function Home() {
   //executar as duas funções
   verAlgoritmo();
   ordenaProcessos();
-  calculaTempo();
+  // calculaTempo();
 
   console.log("tabela", tabela);
 
@@ -339,7 +392,7 @@ export default function Home() {
           </div>
           <div style={{ border: "1px solid #000", marginTop: "20px" }}>
             <h3>Tabela de Resultado</h3>
-            <div style={{display: "flex"}}>Processo | Tempo de chegada | Tempo de espera | Tempo Total (Turnaround)</div>
+            <div style={{display: "flex"}}>Processo | Tempo de chegada | Tempo de espera | Tempo de execução | Tempo Total (Turnaround)</div>
             {renderTabela()}
           </div>
         </main>
