@@ -105,11 +105,9 @@ export default function Home() {
             quantum
           );
           processos.push(...elementosRemovidos);
-          console.log("Elementos removidos:", elementosRemovidos);
         } else if (array.length === 1) {
           let elementoRemovido = array.pop();
           processos.push(elementoRemovido);
-          console.log("Elemento removido:", elementoRemovido);
         } else {
           novaFilaRR.splice(i, 1);
           i--;
