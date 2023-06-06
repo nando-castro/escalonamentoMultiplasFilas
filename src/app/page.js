@@ -16,7 +16,7 @@ export default function Home() {
       id: 2,
       nome: "B",
       prioridade: 0,
-      tempoEntrada: 0,
+      tempoEntrada: 1,
       tempoExecucao: 4,
       color: "blue",
     },
@@ -113,6 +113,38 @@ export default function Home() {
           i--;
         }
       }
+    }
+  }
+
+  /*TABELA*/
+  const tabela = [];
+
+  //calcula o tempo de chegada e soma ao tempo de execucao de cada processo, e retorna o tempo de espera e o tempo total (turnaround)
+  function calculaTempo() {
+    let tempoChegada = 0;
+    let tempoExecucao = 0;
+    let tempoEspera = 0;
+    let tempoTotal = 0;
+    let tempoRetorno = 0;
+    let tempoResposta = 0;
+    const todosProcessos = fila0.concat(fila1);
+
+    for (let i = 0; i < todosProcessos.length; i++) {
+      tempoChegada += todosProcessos[i].tempoEntrada;
+      tempoExecucao += todosProcessos[i].tempoExecucao;
+      tempoEspera = tempoChegada - todosProcessos[i].tempoEntrada;
+      tempoTotal = tempoExecucao + tempoEspera;
+      tempoRetorno = tempoTotal - todosProcessos[i].tempoEntrada;
+      tempoResposta = tempoChegada - todosProcessos[i].tempoEntrada;
+      tabela.push({
+        nome: todosProcessos[i].nome,
+        tempoChegada: tempoChegada,
+        tempoExecucao: tempoExecucao,
+        tempoEspera: tempoEspera,
+        tempoTotal: tempoTotal,
+        tempoRetorno: tempoRetorno,
+        tempoResposta: tempoResposta,
+      });
     }
   }
 
@@ -214,9 +246,40 @@ export default function Home() {
     });
   }
 
+  //renderiza os dados do array tabela
+  function renderTabela() {
+    return tabela.map((processo) => {
+      return (
+        <div
+          key={Math.random()}
+          style={{
+            display: "flex",
+            alignItemsc: "center",
+            // padding: "5px",
+            paddingLeft: "30px",
+            // background: "cyan",
+            border: "1px solid #000",
+            gap: "20px",
+          }}
+        >
+          <p style={{ width: "90px" }}>{processo.nome}</p>
+          <p style={{ width: "150px" }}>{processo.tempoChegada}</p>
+          <p style={{ width: "130px" }}>{processo.tempoExecucao}</p>
+          <p style={{ width: "100px" }}>{processo.tempoTotal}</p>
+          {/* <p style={{ width: "120px" }}>{processo.tempoEspera}</p> */}
+          {/* <p style={{ width: "50px" }}>{processo.tempoRetorno}</p> */}
+          {/* <p style={{ width: "50px" }}>{processo.tempoResposta}</p> */}
+        </div>
+      );
+    });
+  }
+
   //executar as duas funções
   verAlgoritmo();
   ordenaProcessos();
+  calculaTempo();
+
+  console.log("tabela", tabela);
 
   return (
     <div>
@@ -273,6 +336,11 @@ export default function Home() {
             <div style={{ display: "flex" }}>{renderFila0()}</div>
             <p>Fila de prioridade 1 - RR</p>
             <div style={{ display: "flex" }}>{renderFila1()}</div>
+          </div>
+          <div style={{ border: "1px solid #000", marginTop: "20px" }}>
+            <h3>Tabela de Resultado</h3>
+            <div style={{display: "flex"}}>Processo | Tempo de chegada | Tempo de espera | Tempo Total (Turnaround)</div>
+            {renderTabela()}
           </div>
         </main>
       ) : (
