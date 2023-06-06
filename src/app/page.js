@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 export default function Home() {
   const dados = [
     {
@@ -48,13 +50,15 @@ export default function Home() {
   const fila0 = []; //prioridade 0
   const fila1 = []; //prioridade 1
   const filaRR = []; //lista de processos para RR
-  const processos = []; //ordem de execucao
-
-  //RR
+  const processos = []; //ordem de execucao dos processos
   const quantum = 2; //fatia de tempo para execucao
 
+  const [executar, setExecutar] = useState(false);
+
+  /*---------------------LÓGICA PARA EXECUÇÃO DOS ALGORITMOS-------------------------*/
+
   /*FILA 0 = FIFO && FILA 1 = RR */
-  const verAlgortimo = () => {
+  const verAlgoritmo = () => {
     dados.map((dado) => {
       if (dado.prioridade === 0) {
         fila0.push(dado);
@@ -83,20 +87,23 @@ export default function Home() {
       filaRR.push(novoArray);
     }
 
+    //cria um array com os processos repetidos de acordo com o tempo de execucao
     const novaFilaRR = filaRR.map((processo) => {
-      for (let i = 0; i < processo[0].tempoExecucao-1; i++) {
+      for (let i = 0; i < processo[0].tempoExecucao - 1; i++) {
         processo.push(processo[0]);
       }
       return processo;
     });
-    
 
-    //Reorganiza a filaRR para chamar 
+    //Reorganiza a filaRR para chamar os processos em rr para a fila de execução na CPu
     while (novaFilaRR.length > 0) {
       for (let i = 0; i < novaFilaRR.length; i++) {
         let array = novaFilaRR[i];
         if (array.length > 1) {
-          let elementosRemovidos = array.splice(array.length - quantum, quantum);
+          let elementosRemovidos = array.splice(
+            array.length - quantum,
+            quantum
+          );
           processos.push(...elementosRemovidos);
           console.log("Elementos removidos:", elementosRemovidos);
         } else if (array.length === 1) {
@@ -110,6 +117,8 @@ export default function Home() {
       }
     }
   }
+
+  /* ---------------------FUNÇÕES DE RENDERIZAÇÃO-------------------------- */
 
   //FIFO - RENDERIZAR PROCESSOS - FILA 0
   const renderFila0 = () => {
@@ -208,63 +217,107 @@ export default function Home() {
   }
 
   //executar as duas funções
-  verAlgortimo();
+  verAlgoritmo();
   ordenaProcessos();
 
   return (
-    <main style={{ width: "100%", height: "100%", padding: "30px" }}>
-      <p style={{ padding: "10px" }}>ESCALONAMENTO - MÚLTIPLAS FILAS</p>
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        <span>Diagrama de execucao na CPU</span>
-        <div
-          style={{
-            border: "1px solid #000",
-            display: "flex",
-          }}
-        >
-          <p
+    <div>
+      {executar ? (
+        <main style={{ width: "100%", height: "100%", padding: "30px" }}>
+          <p style={{ padding: "10px" }}>ESCALONAMENTO - MÚLTIPLAS FILAS</p>
+          <div
             style={{
-              width: "100px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              width: "100%",
+              height: "100%",
             }}
           >
-            Tempo
-          </p>
-          {renderTempoExecucao()}
-        </div>
+            <span>Diagrama de execucao na CPU</span>
+            <div
+              style={{
+                border: "1px solid #000",
+                display: "flex",
+              }}
+            >
+              <p
+                style={{
+                  width: "100px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                Tempo
+              </p>
+              {renderTempoExecucao()}
+            </div>
+            <div
+              style={{
+                border: "1px solid #000",
+                display: "flex",
+              }}
+            >
+              <p
+                style={{
+                  width: "100px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                Processos
+              </p>
+              {renderProcessosTempo()}
+            </div>
+          </div>
+          <div>
+            <h3>Fila de Processos</h3>
+            <p>Fila de prioridade 0 - FIFO</p>
+            <div style={{ display: "flex" }}>{renderFila0()}</div>
+            <p>Fila de prioridade 1 - RR</p>
+            <div style={{ display: "flex" }}>{renderFila1()}</div>
+          </div>
+        </main>
+      ) : (
         <div
           style={{
-            border: "1px solid #000",
+            width: "100%",
+            height: "100%",
+            padding: "30px",
             display: "flex",
+            // alignItems: "center",
+            // justifyContent: "center",
+            flexDirection: "column",
           }}
         >
-          <p
+          <button
+            onClick={() => setExecutar(true)}
             style={{
               width: "100px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              height: "30px",
             }}
           >
-            Processos
-          </p>
-          {renderProcessosTempo()}
+            Executar
+          </button>
+          <div style={{ marginTop: "50px" }}>
+            <h3>Dados dos Processos</h3>
+            {dados.map((dado) => {
+              return (
+                <div
+                  key={dado.id}
+                  style={{
+                    display: "flex",
+                    gap: "30px",
+                  }}
+                >
+                  <p>Processo: {dado.nome}</p>
+                  <p>Tempo de execução: {dado.tempoExecucao}</p>
+                  <p>Prioridade: {dado.prioridade}</p>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
-      <div>
-        <h3>Fila de Processos</h3>
-        <p>Fila de prioridade 0 - FIFO</p>
-        <div style={{ display: "flex" }}>{renderFila0()}</div>
-        <p>Fila de prioridade 1 - RR</p>
-        <div style={{ display: "flex" }}>{renderFila1()}</div>
-      </div>
-    </main>
+      )}
+    </div>
   );
 }
